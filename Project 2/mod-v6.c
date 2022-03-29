@@ -137,6 +137,12 @@ void initfs(char *file_name , int n1, int n2){
         printf("ERROR: File open failed.");
 }
 
+// q function to quit the program.
+void q() {
+    printf("\nClosing file system...\n");
+    exit(0);
+}
+
 
 // The main function
 int main(){
