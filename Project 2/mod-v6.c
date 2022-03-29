@@ -107,6 +107,7 @@ void initfs(char *file_name , int n1, int n2){
     if(fd != -1){
         superBlock.isize = n2;
         superBlock.fsize = n1;
+        superBlock.ninode = 0;
         if((n1 - n2 - 2) >= 200){ // in the case that there is enough blocks to fill free[]
             superBlock.nfree = 199;
             int i , j = 0;
@@ -125,6 +126,10 @@ void initfs(char *file_name , int n1, int n2){
                 j++;
             }
         }
+
+        //write superblock
+        lseek(fd, BLOCK_SIZE, SEEK_SET);
+        write(fd, &superBlock, 1);
 
         inode_type inode1;
         fill_an_inode_and_write(1);
