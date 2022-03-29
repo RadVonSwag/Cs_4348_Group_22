@@ -22,8 +22,6 @@ typedef struct {
     unsigned short inode[100];
 } superblock_type;
 
-superblock_type superBlock;
-
 typedef struct {
     unsigned short flags;
     unsigned short nlinks;
@@ -41,6 +39,7 @@ typedef struct {
     char filename[28];
 } dir_type;  //32 Bytes long
 
+superblock_type superBlock;
 inode_type root;
 
 int fd;
@@ -131,15 +130,41 @@ void initfs(char *file_name , int n1, int n2){
         lseek(fd, BLOCK_SIZE, SEEK_SET);
         write(fd, &superBlock, 1);
 
+        //init root inode
         inode_type inode1;
         fill_an_inode_and_write(1);
         inode1 = inode_reader(1,inode1);
 
-        lseek(fd, ((n2 * INODE_SIZE) + (2 * BLOCK_SIZE)), SEEK_SET); // seeks to point after root and superblock and inodes
+        //write inodes
+        lseek(fd, (2 * BLOCK_SIZE), SEEK_SET);
+        for (int i = 0; i < n2; i++ ) {
+            write(fd, &superBlock.inode[i], INODE_SIZE);
+        } 
+
+        // seeks to point after root and superblock and inodes
+        lseek(fd, ((n2 * INODE_SIZE) + (2 * BLOCK_SIZE)), SEEK_SET); 
         write(fd, " ", 1);
     }
-    else
+    else {
         printf("ERROR: File open failed.");
+    }
+
+    //close the file
+    //fclose(fd); getting segmentation faults at the moment.
+
+}
+
+//printfs for debugging
+void printfs() {
+    printf("Superblock Info\n");
+    printf("\tnumber of inodes: %d\n", superBlock.isize);
+    printf("\tnumber of blocks: %d\n", superBlock.fsize);
+    printf("\tsize of block: %d\n", BLOCK_SIZE);
+    printf("\tnfree: %d", superBlock.nfree);
+    //etc
+
+    printf("\nInode Info\n...");
+
 }
 
 // q function to quit the program.
@@ -152,4 +177,5 @@ void q() {
 // The main function
 int main(){
     initfs("Test_fs.txt", 500, 16);
+    q();
 }
